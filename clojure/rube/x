@@ -1,0 +1,17 @@
+
+(defun pared-moves-on-all-pieces (moves)
+  (labels ((diff (image original)
+		 (cond ((or (null image) (null original)) '())
+		       ((equal (car image) (car original))
+			(diff (cdr image) (cdr original)))
+		       (t
+			(cons
+			 (if (rube-piece-equal (car image) (car original))
+			     (cons (car original) (sign-of-rotation
+						   (car original) (car image)))
+			   (list (car original) '-> (car image)))
+			 (diff (cdr image) (cdr original)))))))
+    (diff (moves-on-pieces moves *rube-list-of-all-pieces*)
+	  *rube-list-of-all-pieces*)))
+;; (pared-moves-on-all-pieces '(F))
+;; (setf moves '(F))

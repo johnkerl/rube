@@ -1,0 +1,4 @@
+
+# ================================================================
+def images_of_all_pieces (moves):
+	return images_of_pieces(moves, list_of_all_pieces)
