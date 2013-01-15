@@ -1,11 +1,14 @@
 (ns rube.core
   (:require clojure.contrib.math))
 
-;; xxx for notes: eval order ... different from CL.
-;;
-;; xxx for notes:  this is FU'ed
-;; (class '(2 3 4))
-;; (class (cons 1 '(2 3 4)))
+;;================================================================
+;; xxx for notes for Clojure-from-Lisp:
+;;----------------------------------------------------------------
+;; * eval order ... different from CL.
+;;----------------------------------------------------------------
+;; * this is very different from CL:
+;;   (class '(2 3 4))
+;;   (class (cons 1 '(2 3 4)))
 ;;
 ;;----------------------------------------------------------------
 ;; OK IN CL:
@@ -28,6 +31,7 @@
 ;;
 ;;----------------------------------------------------------------
 ;; v impt re the consing et al.:  http://clojure.org/sequences
+
 
 ;;;; ================================================================
 ;;;; RUBE.CLJ
@@ -132,7 +136,7 @@
 ;;; =============================================================================
 ;; RUBE PORTABILITY SECTION
 ;; Implementation of these functions depends on the platform:
-;; xxx for clj, much more than this ...
+;; xxx for clj, much more than this ... probably strip these out.
 ;;
 ;; For Common Lisp, use "string".
 ;; For Emacs List, use "prin1-to-string".
@@ -213,8 +217,6 @@
         (recur (rest list-1) (rest list-2))))
 
 ;;; -----------------------------------------------------------------------------
-;;; xxx file ...
-
 ;; xxx cmt about return types
 (defn validate-moves-aux [moves]
   (cond (empty? moves) true
