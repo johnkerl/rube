@@ -144,7 +144,7 @@ def images_of_pieces (moves, pieces):
 		if (piece_equal(piece, image)):
 			sign = sign_of_rotation(piece, image)
 			if (sign != []):
-				result.append([piece, image])
+				result.append([piece, sign[0]])
 		else:
 			result.append([piece, "->", image])
 	return result
