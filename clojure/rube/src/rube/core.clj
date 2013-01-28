@@ -259,7 +259,7 @@
 ;; Faces are represented by characters; moves are represented by symbols.
 ;; Does a simple table lookup.
 (defn find-image-of-move-on-face [move face]
-  "Returns the image of a face under a move."
+  "Returns the image of a face under a move, e.g. U on F gives R."
   (let [row-vector (table-move-on-face-table face),
         vector-index (table-move-index-lookup-alist move)]
     (cond (= nil row-vector)
@@ -293,7 +293,7 @@
 ;; Both arguments are represented by symbols.
 
 (defn find-image-of-move-on-corner-piece [move corner]
-  "Returns the image of a corner piece under a move."
+  "Returns the image of a corner piece under a move, e.g. U on UFL gives UFL."
   (let [ps   (symbol-to-string corner),
         ps0  (select-char-in-string ps 0),
         ps1  (select-char-in-string ps 1),
@@ -325,7 +325,7 @@
 ;; Both arguments are represented by symbols.
 
 (defn find-image-of-move-on-edge-piece [move edge]
-  "Returns the image of an edge piece under a move."
+  "Returns the image of an edge piece under a move, e.g. U on UF gives UR."
   (let [ps   (symbol-to-string edge)
         ps0  (select-char-in-string ps 0)
         ps1  (select-char-in-string ps 1)
@@ -344,7 +344,7 @@
 
 ;; -----------------------------------------------------------------------------
 (defn find-image-of-moves-on-piece [moves piece]
-  "Returns the image of a list of moves on a piece."
+  "Returns the image of a list of moves on a piece, e.g. U R on UF gives BF."
   ;; Need to tune this (use an auxiliary function? moves-on-corner-piece and
   ;; moves-on-edge-piece?) so that it doesn't check the same piece over and
   ;; over for corner/edge.  Once passed in, it won't change!
@@ -426,6 +426,7 @@
 ;;; RUBE CYCLE SECTION
 
 (defn find-cycle-length [cycle]
+  "Accepts signed-cycle notation on input: e.g. '(UFR DFL) has length 2 and '(UF UB +) has length 4."
   ;; Supports the signed-cycle notation used by the find-cycle-decomposition logic.
   ;; E.g. the cycle '(UFR DFL) has length 2.  But '(UFR +) has length, not 1,
   ;; but 3.  Likewise '(UF UB +) has length 4.
@@ -513,7 +514,6 @@
     cycles))
 
 ;; -----------------------------------------------------------------------------
-; To do: make this name a verb
 (defn find-cycle-decomposition [moves]
   ;; Given a list of Rubik's Cube pieces and a list of moves, return the cycle
   ;; decomposition of the moves, omitting trivial cycles.
@@ -523,14 +523,15 @@
 ;;; RUBE ORDER SECTION
 
 (defn find-multi-lcm [args]
+  "E.g. '(8 12 20) maps to 120  This is a built-in (namely, lcm) in Common Lisp."
   (cond (empty? args) 1
         :else (let [f (first args) r (rest args)]
                 (clojure.contrib.math/lcm f (find-multi-lcm r)))))
 
 (defn find-order [moves]
   (find-multi-lcm
-         (map #(find-cycle-length %)
-              (find-cycle-decomposition moves))))
+    (map #(find-cycle-length %)
+         (find-cycle-decomposition moves))))
 
 ;;; =============================================================================
 ;;; RUBE IMAGES SECTION
