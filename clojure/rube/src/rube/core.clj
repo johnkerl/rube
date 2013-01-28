@@ -365,7 +365,7 @@
 ;;; Image of a sequence of moves on a list of pieces.
 
 ;;----------------------------------------------------------------
-(defn find-image-of-find-image-of-moves-on-pieces [moves pieces]
+(defn find-image-of-moves-on-pieces [moves pieces]
   "Returns the image of a list of moves on a list of pieces."
   (map (fn [piece] (find-image-of-moves-on-piece moves piece)) pieces))
 
@@ -563,7 +563,7 @@
           (pair-pieces-and-images (rest pieces) (rest images)))))))
 
 (defn find-images-of-pieces [moves, pieces]
-  (pair-pieces-and-images pieces (find-image-of-find-image-of-moves-on-pieces moves pieces)))
+  (pair-pieces-and-images pieces (find-image-of-moves-on-pieces moves pieces)))
 
 (defn find-images-of-all-pieces [moves]
   (find-images-of-pieces moves table-list-of-all-pieces))

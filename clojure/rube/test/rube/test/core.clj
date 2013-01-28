@@ -92,15 +92,15 @@
 ;;; xxx more ...
 
 ;;; ================================================================
-(deftest test-find-image-of-find-image-of-moves-on-pieces
+(deftest test-find-image-of-moves-on-pieces
   (and
     (is (piece-lists-equal?
         '(UL RU DR BF)
-        (find-image-of-find-image-of-moves-on-pieces '(U F R) '(UF UR BR BF))))
-    (is (piece-lists-equal? '(RFD RF) (find-image-of-find-image-of-moves-on-pieces '(F) '(UFR UF))))
-    (is (piece-lists-equal? '(DFL DF) (find-image-of-find-image-of-moves-on-pieces '(F F) '(UFR UF))))
-    (is (piece-lists-equal? '(LFU LF) (find-image-of-find-image-of-moves-on-pieces '(F F F) '(UFR UF))))
-    (is (piece-lists-equal? '(UFR UF) (find-image-of-find-image-of-moves-on-pieces '(F F F F) '(UFR UF))))))
+        (find-image-of-moves-on-pieces '(U F R) '(UF UR BR BF))))
+    (is (piece-lists-equal? '(RFD RF) (find-image-of-moves-on-pieces '(F) '(UFR UF))))
+    (is (piece-lists-equal? '(DFL DF) (find-image-of-moves-on-pieces '(F F) '(UFR UF))))
+    (is (piece-lists-equal? '(LFU LF) (find-image-of-moves-on-pieces '(F F F) '(UFR UF))))
+    (is (piece-lists-equal? '(UFR UF) (find-image-of-moves-on-pieces '(F F F F) '(UFR UF))))))
 
 ;; ================================================================
 (deftest test-invert-move
@@ -321,10 +321,10 @@
 ;;	;;  	 R L- F2 R- L D
 ;;	;;  	 R L- F  R- L D
 ;;	;;  	 R L- F  R- L D2))
-;;	;; (find-image-of-find-image-of-moves-on-pieces (find-power-of-sequence '(B R- D2 R B- U2) 2) table-list-of-all-pieces)
-;;	;; (find-image-of-find-image-of-moves-on-pieces '(R L- F R- L D2 R L- F R- L) '(DR DB DL))
-;;	;; (find-image-of-find-image-of-moves-on-pieces '(R L- F R- L D2 R L- F R- L) table-list-of-all-pieces)
-;;	;; (find-image-of-find-image-of-moves-on-pieces (find-power-of-sequence '(B R- D2 R B- U2) 2) table-list-of-all-pieces)
+;;	;; (find-image-of-moves-on-pieces (find-power-of-sequence '(B R- D2 R B- U2) 2) table-list-of-all-pieces)
+;;	;; (find-image-of-moves-on-pieces '(R L- F R- L D2 R L- F R- L) '(DR DB DL))
+;;	;; (find-image-of-moves-on-pieces '(R L- F R- L D2 R L- F R- L) table-list-of-all-pieces)
+;;	;; (find-image-of-moves-on-pieces (find-power-of-sequence '(B R- D2 R B- U2) 2) table-list-of-all-pieces)
 ;;	;; (pared-moves-on-all-pieces '(R L- F R- L D2 R L- F R- L))
 ;;	;; (pared-moves-on-all-pieces (find-power-of-sequence '(B R- D2 R B- U2) 2))
 ;;	;; (pared-moves-on-all-pieces (find-power-of-sequence '(F2 R2) 2))
