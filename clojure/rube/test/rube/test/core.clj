@@ -1,5 +1,6 @@
-;; xxx def vs. deftest ...
-;; xxx the is business ...
+;; To do as part of the porting experiment:
+;; * def vs. deftest ...
+;; * the 'is' business ...
 
 (ns rube.test.core
   (:use [rube.core])
@@ -22,10 +23,16 @@
     (is (not (character? "a")))))
 
 ;;; ================================================================
-(deftest test-is-corner-piece
+(deftest test-is-corner-piece?
   (and
-    (is (is-corner-piece 'UFR))
-    (is (not (is-corner-piece 'UR)))))
+    (is (is-corner-piece? 'UFR))
+    (is (not (is-corner-piece? 'UR)))))
+
+;;; ================================================================
+(deftest test-is-edge-piece?
+  (and
+    (is (is-edge-piece? 'UR))
+    (is (not (is-edge-piece? 'UFR)))))
 
 ;;; ================================================================
 (deftest test-piece-equal?
@@ -63,37 +70,37 @@
 ;;; ================================================================
 (deftest test-move-on-face
   (and
-    (is \R (move-on-face 'U \F))
-    (is \D (move-on-face 'U \D))))
+    (is \R (find-image-of-move-on-face 'U \F))
+    (is \D (find-image-of-move-on-face 'U \D))))
 
 ;;; ================================================================
-(deftest test-move-on-corner-piece
+(deftest test-find-image-of-move-on-corner-piece
   (and
-    (is (piece-equal? 'DFR (move-on-corner-piece 'F 'URF)))
-    (is (piece-equal? 'URF (move-on-corner-piece 'B 'URF)))))
+    (is (piece-equal? 'DFR (find-image-of-move-on-corner-piece 'F 'URF)))
+    (is (piece-equal? 'URF (find-image-of-move-on-corner-piece 'B 'URF)))))
 
-(deftest test-move-on-edge-piece
+(deftest test-find-image-of-move-on-edge-piece
   (and
-    (is (piece-equal? 'FR (move-on-edge-piece 'F 'UF)))
-    (is (piece-equal? 'UF (move-on-edge-piece 'B 'UF)))))
+    (is (piece-equal? 'FR (find-image-of-move-on-edge-piece 'F 'UF)))
+    (is (piece-equal? 'UF (find-image-of-move-on-edge-piece 'B 'UF)))))
 
 ;;; ================================================================
-(deftest test-moves-on-piece
+(deftest test-find-image-of-moves-on-piece
   (and
-    (is (piece-equal? 'UBR (moves-on-piece '(U F R) 'UFR)))
-    (is (piece-equal? 'URF (moves-on-piece '(F F F F) 'UFR)))))
+    (is (piece-equal? 'UBR (find-image-of-moves-on-piece '(U F R) 'UFR)))
+    (is (piece-equal? 'URF (find-image-of-moves-on-piece '(F F F F) 'UFR)))))
 ;;; xxx more ...
 
 ;;; ================================================================
-(deftest test-moves-on-pieces
+(deftest test-find-image-of-find-image-of-moves-on-pieces
   (and
     (is (piece-lists-equal?
         '(UL RU DR BF)
-        (moves-on-pieces '(U F R) '(UF UR BR BF))))
-    (is (piece-lists-equal? '(RFD RF) (moves-on-pieces '(F) '(UFR UF))))
-    (is (piece-lists-equal? '(DFL DF) (moves-on-pieces '(F F) '(UFR UF))))
-    (is (piece-lists-equal? '(LFU LF) (moves-on-pieces '(F F F) '(UFR UF))))
-    (is (piece-lists-equal? '(UFR UF) (moves-on-pieces '(F F F F) '(UFR UF))))))
+        (find-image-of-find-image-of-moves-on-pieces '(U F R) '(UF UR BR BF))))
+    (is (piece-lists-equal? '(RFD RF) (find-image-of-find-image-of-moves-on-pieces '(F) '(UFR UF))))
+    (is (piece-lists-equal? '(DFL DF) (find-image-of-find-image-of-moves-on-pieces '(F F) '(UFR UF))))
+    (is (piece-lists-equal? '(LFU LF) (find-image-of-find-image-of-moves-on-pieces '(F F F) '(UFR UF))))
+    (is (piece-lists-equal? '(UFR UF) (find-image-of-find-image-of-moves-on-pieces '(F F F F) '(UFR UF))))))
 
 ;; ================================================================
 (deftest test-invert-move
@@ -113,51 +120,51 @@
     (is '(F- R- B- L2 U+ D2) (invert-moves '(D2 U- L2 B R F+)))))
 
 ;; ================================================================
-(deftest test-power-of-sequence
+(deftest test-find-power-of-sequence
   (and
-    (is '()   (power-of-sequence '() 0))
-    (is '()   (power-of-sequence '() 1))
-    (is '()   (power-of-sequence '() 2))
-    (is '()   (power-of-sequence '() -1))
-    (is '()   (power-of-sequence '() -2))
-    (is '()   (power-of-sequence '(F) 0))
-    (is '(F)  (power-of-sequence '(F) 1))
-    (is '(F2) (power-of-sequence '(F) 2))
-    (is '(F-) (power-of-sequence '(F) -1))
-    (is '(F-) (power-of-sequence '(F) 3))
-    (is '()   (power-of-sequence '(F) 4))
-    (is '()   (power-of-sequence '(F) -4))
-    (is '(F2) (power-of-sequence '(F) -2))
-    (is '(F R F R F R) (power-of-sequence '(F R) 3))))
+    (is '()   (find-power-of-sequence '() 0))
+    (is '()   (find-power-of-sequence '() 1))
+    (is '()   (find-power-of-sequence '() 2))
+    (is '()   (find-power-of-sequence '() -1))
+    (is '()   (find-power-of-sequence '() -2))
+    (is '()   (find-power-of-sequence '(F) 0))
+    (is '(F)  (find-power-of-sequence '(F) 1))
+    (is '(F2) (find-power-of-sequence '(F) 2))
+    (is '(F-) (find-power-of-sequence '(F) -1))
+    (is '(F-) (find-power-of-sequence '(F) 3))
+    (is '()   (find-power-of-sequence '(F) 4))
+    (is '()   (find-power-of-sequence '(F) -4))
+    (is '(F2) (find-power-of-sequence '(F) -2))
+    (is '(F R F R F R) (find-power-of-sequence '(F R) 3))))
 
 ;; ================================================================
-(deftest test-conjugate
+(deftest test-find-conjugate
   (and
-    (is '(F R F-)) (conjugate 'F 'R)
-    (is '(F R F-)) (conjugate 'F '(R))
-    (is '(F R F-)) (conjugate '(F) 'R)
-    (is '(F R F-)) (conjugate '(F) '(R))
-    (is '()) (conjugate '() '())
-    (is '()) (conjugate '(U) '(U U U U))))
+    (is '(F R F-)) (find-conjugate 'F 'R)
+    (is '(F R F-)) (find-conjugate 'F '(R))
+    (is '(F R F-)) (find-conjugate '(F) 'R)
+    (is '(F R F-)) (find-conjugate '(F) '(R))
+    (is '()) (find-conjugate '() '())
+    (is '()) (find-conjugate '(U) '(U U U U))))
 
 ;; ================================================================
-(deftest test-commutator
+(deftest test-find-commutator
   (and
-    (is '() (commutator '() '()))
-    (is '(U R U- R-) (commutator '(U) '(R)))
-    (is '(U D U- D-) (commutator '(U) '(D)))))
+    (is '() (find-commutator '() '()))
+    (is '(U R U- R-) (find-commutator '(U) '(R)))
+    (is '(U D U- D-) (find-commutator '(U) '(D)))))
 
 ;; ================================================================
-(deftest test-cycle-length
+(deftest test-find-cycle-length
   (and
-    (is 0 (cycle-length '()))
-    (is 1 (cycle-length '(UF)))
-    (is 2 (cycle-length '(UF DB)))
-    (is 2 (cycle-length '(UFR DBL)))
-    (is 4 (cycle-length '(UF FR +)))
-    (is 4 (cycle-length '(UF FR -)))
-    (is 6 (cycle-length '(UF FL FR -)))
-    (is 9 (cycle-length '(UFR DFL BRU -)))))
+    (is 0 (find-cycle-length '()))
+    (is 1 (find-cycle-length '(UF)))
+    (is 2 (find-cycle-length '(UF DB)))
+    (is 2 (find-cycle-length '(UFR DBL)))
+    (is 4 (find-cycle-length '(UF FR +)))
+    (is 4 (find-cycle-length '(UF FR -)))
+    (is 6 (find-cycle-length '(UF FL FR -)))
+    (is 9 (find-cycle-length '(UFR DFL BRU -)))))
 
 ;; ================================================================
 (deftest test-memtree
@@ -170,16 +177,16 @@
     (is  (memtree? 'UL '(UF (FB (UL) DL) FR BL)))))
 
 ;; ================================================================
-(deftest test-get-sign-of-rotation
+(deftest test-find-sign-of-rotation
   (and
-    (is '()  (get-sign-of-rotation 'UF 'DL))
-    (is '()  (get-sign-of-rotation 'UF 'FU))
-    (is '(+) (get-sign-of-rotation 'UF 'UF))
-    (is '()  (get-sign-of-rotation 'UFR 'UFL))
-    (is '()  (get-sign-of-rotation 'UFR 'UFR))
-    (is '(+) (get-sign-of-rotation 'UFR 'URF))
-    (is '(-) (get-sign-of-rotation 'FUR 'FRU))
-    (is '()  (get-sign-of-rotation 'UFR 'UR))))
+    (is '()  (find-sign-of-rotation 'UF 'DL))
+    (is '()  (find-sign-of-rotation 'UF 'FU))
+    (is '(+) (find-sign-of-rotation 'UF 'UF))
+    (is '()  (find-sign-of-rotation 'UFR 'UFL))
+    (is '()  (find-sign-of-rotation 'UFR 'UFR))
+    (is '(+) (find-sign-of-rotation 'UFR 'URF))
+    (is '(-) (find-sign-of-rotation 'FUR 'FRU))
+    (is '()  (find-sign-of-rotation 'UFR 'UR))))
 
 ;; ================================================================
 (deftest test-find-cycle-aux
@@ -193,7 +200,7 @@
   (and
     (is (piece-lists-equal? '(UF UL UB UR) (find-cycle 'UF '(U))))
     (is (piece-lists-equal? '(UFR ULF UBL URB) (find-cycle 'UFR '(U))))
-    (is (piece-lists-equal? '(UFR FUL BLU URB -) (find-cycle 'UFR '(F R B L U D))))))
+    (is (piece-lists-equal? '(UFR FUL BLU URB +) (find-cycle 'UFR '(F R B L U D))))))
 
 ;; ================================================================
 (deftest test-find-cycles
@@ -223,40 +230,40 @@
 (deftest test-cycle-decomposition
   (and
     (is (= '((UFR RFD DFL LFU) (UF RF DF LF))
-           (cycle-decomposition '(F))))
-    (is (= '((UFR -) (UFL RUB RBD RDF DLF +) (UF RU RB RD RF DF LF))
-           (cycle-decomposition '(F R))))
-    (is (= '((UFR -) (UFL -) (UBL -) (UBR -) (DFR LDB DRB -) (DFL -)
+           (find-cycle-decomposition '(F))))
+    (is (= '((UFR +) (UFL RUB RBD RDF DLF -) (UF RU RB RD RF DF LF))
+           (find-cycle-decomposition '(F R))))
+    (is (= '((UFR +) (UFL +) (UBL +) (UBR +) (DFR LDB DRB +) (DFL +)
                (UF RU UB LU LF) (FR FD DL BL BD BR DR))
-           (cycle-decomposition '(F R B L))))
+           (find-cycle-decomposition '(F R B L))))
     (is (= '((UFR DFL DBR) (UFL UBR DFR) (UF DF) (UR DR) (FR FL BR))
-           (cycle-decomposition '(F2 R2))))
+           (find-cycle-decomposition '(F2 R2))))
     (is (= '((UFR DFL) (UFL DFR) (UF DF) (FR FL))
-           (cycle-decomposition '(F2))))
+           (find-cycle-decomposition '(F2))))
     (is (= '((UFR DFL) (UFL DFR) (UBL DBR) (UBR DBL) (UF DF) (UB DB) (FR FL) (BL BR))
-           (cycle-decomposition '(F2 B2))))
+           (find-cycle-decomposition '(F2 B2))))
     (is (= '()
-           (cycle-decomposition '(U D U- D-))))))
+           (find-cycle-decomposition '(U D U- D-))))))
 
 ;; ================================================================
-(deftest test-multi-lcm
+(deftest test-find-multi-lcm
   (and
-    (is (=   1 (multi-lcm '())))
-    (is (=   8 (multi-lcm '(8))))
-    (is (=  40 (multi-lcm '(8 10))))
-    (is (= 120 (multi-lcm '(8 10 12))))
-    (is (= 840 (multi-lcm '(8 10 12 14))))))
+    (is (=   1 (find-multi-lcm '())))
+    (is (=   8 (find-multi-lcm '(8))))
+    (is (=  40 (find-multi-lcm '(8 10))))
+    (is (= 120 (find-multi-lcm '(8 10 12))))
+    (is (= 840 (find-multi-lcm '(8 10 12 14))))))
 
 ;; ================================================================
 (deftest test-order
   (and
-    (is (=   1 (order '())))
-    (is (=   4 (order '(U))))
-    (is (=   2 (order '(U2))))
-    (is (=   1 (order '(U U U U))))
-    (is (=  12 (order '(F R B L U D))))
-    (is (=   6 (order '(F2 R2 B2 L2))))
-    (is (= 315 (order '(F R B L))))))
+    (is (=   1 (find-order '())))
+    (is (=   4 (find-order '(U))))
+    (is (=   2 (find-order '(U2))))
+    (is (=   1 (find-order '(U U U U))))
+    (is (=  12 (find-order '(F R B L U D))))
+    (is (=   6 (find-order '(F2 R2 B2 L2))))
+    (is (= 315 (find-order '(F R B L))))))
 
 ;; ================================================================
 (deftest test-pair-pieces-and-images
@@ -276,74 +283,74 @@
 ;; ================================================================
 (deftest test-images-of-pieces
   (and
-    (is (= (images-of-pieces '() '()) '()))
-    (is (= (images-of-pieces '(F R B L) '()) '()))
-    (is (= (images-of-pieces '() '(UFR UF)) '()))
-    (is (= (images-of-pieces '(U) '(UFR UF)) '((UFR -> ULF) (UF -> UL))))))
+    (is (= (find-images-of-pieces '() '()) '()))
+    (is (= (find-images-of-pieces '(F R B L) '()) '()))
+    (is (= (find-images-of-pieces '() '(UFR UF)) '()))
+    (is (= (find-images-of-pieces '(U) '(UFR UF)) '((UFR -> ULF) (UF -> UL))))))
 
 ;;;; -----------------------------------------------------------------------------
 ;;;; TESTS TO BE FILED
 
-;;	;; (mapcar #'(lambda (x)	  (move-on-face 'U x)) '(\F \R \B \L \U \D))
+;;	;; (mapcar #'(lambda (x)	  (find-image-of-move-on-face 'U x)) '(\F \R \B \L \U \D))
 ;;
 ;;	;; (setf forward-moves  '(F R B L U D))
 ;;	;; (setf backward-moves '(F- R- B- L- U- D-))
 ;;	;; (setf double-moves   '(F2 R2 B2 L2 U2 D2))
 ;;
-;;	;; (mapcar #'(lambda (x) (move-on-edge-piece x 'UF)) forward-moves)
-;;	;; (mapcar #'(lambda (x) (move-on-edge-piece x 'UF)) backward-moves)
-;;	;; (mapcar #'(lambda (x) (move-on-edge-piece x 'UF)) double-moves)
+;;	;; (mapcar #'(lambda (x) (find-image-of-move-on-edge-piece x 'UF)) forward-moves)
+;;	;; (mapcar #'(lambda (x) (find-image-of-move-on-edge-piece x 'UF)) backward-moves)
+;;	;; (mapcar #'(lambda (x) (find-image-of-move-on-edge-piece x 'UF)) double-moves)
 ;;
-;;	;; (mapcar #'(lambda (x) (move-on-edge-piece x 'FU)) forward-moves)
-;;	;; (mapcar #'(lambda (x) (move-on-edge-piece x 'FU)) backward-moves)
-;;	;; (mapcar #'(lambda (x) (move-on-edge-piece x 'FU)) double-moves)
+;;	;; (mapcar #'(lambda (x) (find-image-of-move-on-edge-piece x 'FU)) forward-moves)
+;;	;; (mapcar #'(lambda (x) (find-image-of-move-on-edge-piece x 'FU)) backward-moves)
+;;	;; (mapcar #'(lambda (x) (find-image-of-move-on-edge-piece x 'FU)) double-moves)
 ;;
-;;	;; (mapcar #'(lambda (x) (move-on-corner-piece x 'UFR)) forward-moves)
-;;	;; (mapcar #'(lambda (x) (move-on-corner-piece x 'UFR)) backward-moves)
-;;	;; (mapcar #'(lambda (x) (move-on-corner-piece x 'UFR)) double-moves)
+;;	;; (mapcar #'(lambda (x) (find-image-of-move-on-corner-piece x 'UFR)) forward-moves)
+;;	;; (mapcar #'(lambda (x) (find-image-of-move-on-corner-piece x 'UFR)) backward-moves)
+;;	;; (mapcar #'(lambda (x) (find-image-of-move-on-corner-piece x 'UFR)) double-moves)
 ;;
-;;	;; (cycle-decomposition '(B- U2 B2 U B- U- B- U2 F R B R- F-))
-;;	;; (cycle-decomposition '(R L- F R- L D2 R L- F R- L))
-;;	;; (cycle-decomposition (power-of-sequence '(B R- D2 R B- U2) 1))
-;;	;; (cycle-decomposition (power-of-sequence '(B R- D2 R B- U2) 2))
-;;	;; (cycle-decomposition (power-of-sequence '(F R) 2))
-;;	;; (cycle-decomposition (power-of-sequence '(F2 R2) 6))
-;;	;; (cycle-decomposition
+;;	;; (find-cycle-decomposition '(B- U2 B2 U B- U- B- U2 F R B R- F-))
+;;	;; (find-cycle-decomposition '(R L- F R- L D2 R L- F R- L))
+;;	;; (find-cycle-decomposition (find-power-of-sequence '(B R- D2 R B- U2) 1))
+;;	;; (find-cycle-decomposition (find-power-of-sequence '(B R- D2 R B- U2) 2))
+;;	;; (find-cycle-decomposition (find-power-of-sequence '(F R) 2))
+;;	;; (find-cycle-decomposition (find-power-of-sequence '(F2 R2) 6))
+;;	;; (find-cycle-decomposition
 ;;	;;   '(R L- F  R- L D
 ;;	;;  	 R L- F  R- L D
 ;;	;;  	 R L- F2 R- L D
 ;;	;;  	 R L- F  R- L D
 ;;	;;  	 R L- F  R- L D2))
-;;	;; (moves-on-pieces (power-of-sequence '(B R- D2 R B- U2) 2) table-list-of-all-pieces)
-;;	;; (moves-on-pieces '(R L- F R- L D2 R L- F R- L) '(DR DB DL))
-;;	;; (moves-on-pieces '(R L- F R- L D2 R L- F R- L) table-list-of-all-pieces)
-;;	;; (moves-on-pieces (power-of-sequence '(B R- D2 R B- U2) 2) table-list-of-all-pieces)
+;;	;; (find-image-of-find-image-of-moves-on-pieces (find-power-of-sequence '(B R- D2 R B- U2) 2) table-list-of-all-pieces)
+;;	;; (find-image-of-find-image-of-moves-on-pieces '(R L- F R- L D2 R L- F R- L) '(DR DB DL))
+;;	;; (find-image-of-find-image-of-moves-on-pieces '(R L- F R- L D2 R L- F R- L) table-list-of-all-pieces)
+;;	;; (find-image-of-find-image-of-moves-on-pieces (find-power-of-sequence '(B R- D2 R B- U2) 2) table-list-of-all-pieces)
 ;;	;; (pared-moves-on-all-pieces '(R L- F R- L D2 R L- F R- L))
-;;	;; (pared-moves-on-all-pieces (power-of-sequence '(B R- D2 R B- U2) 2))
-;;	;; (pared-moves-on-all-pieces (power-of-sequence '(F2 R2) 2))
+;;	;; (pared-moves-on-all-pieces (find-power-of-sequence '(B R- D2 R B- U2) 2))
+;;	;; (pared-moves-on-all-pieces (find-power-of-sequence '(F2 R2) 2))
 ;;	;;
-;;	;; (order (power-of-sequence '(B R- D2 R B- U2) 2))
-;;	;; (order '(R L- F R- L D2 R L- F R- L))
-;;	;; (order '(R L- F R- L D2 R L- F R- L))
-;;	;; (order (power-of-sequence '(B R- D2 R B- U2) 2))
-;;	;; (order '(R L- F R- L D2 R L- F R- L))
-;;	;; (order (power-of-sequence '(B R- D2 R B- U2) 2))
-;;	;; (order (power-of-sequence '(F2 R2) 2))
-;;	;; (order '(F R B L))
-;;	;; (order '(F2 R2))
-;;	;; (order '(F R))
-;;	;; (order '(F R-))
-;;	;; (order '(F R2))
-;;	;; (order '(F U R))
-;;	;; (order '(F U R B D L))
-;;	;; (order '(F U R B L D))
-;;	;; (order '(F))
+;;	;; (find-order (find-power-of-sequence '(B R- D2 R B- U2) 2))
+;;	;; (find-order '(R L- F R- L D2 R L- F R- L))
+;;	;; (find-order '(R L- F R- L D2 R L- F R- L))
+;;	;; (find-order (find-power-of-sequence '(B R- D2 R B- U2) 2))
+;;	;; (find-order '(R L- F R- L D2 R L- F R- L))
+;;	;; (find-order (find-power-of-sequence '(B R- D2 R B- U2) 2))
+;;	;; (find-order (find-power-of-sequence '(F2 R2) 2))
+;;	;; (find-order '(F R B L))
+;;	;; (find-order '(F2 R2))
+;;	;; (find-order '(F R))
+;;	;; (find-order '(F R-))
+;;	;; (find-order '(F R2))
+;;	;; (find-order '(F U R))
+;;	;; (find-order '(F U R B D L))
+;;	;; (find-order '(F U R B L D))
+;;	;; (find-order '(F))
 ;;	;;
 
 ;; (tell-about '(F))
-;; (tell-about (power-of-sequence '(B R- D2 R B- U2) 2))
+;; (tell-about (find-power-of-sequence '(B R- D2 R B- U2) 2))
 ;; (tell-about '(R L- F R- L D2 R L- F R- L))
-;; (tell-about (power-of-sequence '(F2 R2) 2))
+;; (tell-about (find-power-of-sequence '(F2 R2) 2))
 ;; (tell-about '(F R B L))
 ;; (tell-about '(F R B L D U))
 ;; (tell-about '(R L- F  R- L D

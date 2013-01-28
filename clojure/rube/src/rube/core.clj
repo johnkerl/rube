@@ -1,37 +1,6 @@
 (ns rube.core
   (:require clojure.contrib.math))
 
-;;================================================================
-;; xxx for notes for Clojure-from-Lisp:
-;;----------------------------------------------------------------
-;; * eval order ... different from CL.
-;;----------------------------------------------------------------
-;; * this is very different from CL:
-;;   (class '(2 3 4))
-;;   (class (cons 1 '(2 3 4)))
-;;
-;;----------------------------------------------------------------
-;; OK IN CL:
-;(defun foo (x)
-;(+ 1 (bar x)))
-;
-;(defun bar (x) (* 2 x))
-;(print (foo 10))
-;;----------------------------------------------------------------
-;; NOT OK IN CLJ:
-;
-;(defn foo [x]
-; (+ 1 (bar x)))
-;(defn bar [x] (* 2 x))
-;
-;(print (foo 10))
-;
-; BUT WORKS ON W/ BAR DEF'D BEFORE FOO
-;;----------------------------------------------------------------
-;;
-;;----------------------------------------------------------------
-;; v impt re the consing et al.:  http://clojure.org/sequences
-
 
 ;;;; ================================================================
 ;;;; RUBE.CLJ
@@ -57,6 +26,38 @@
 ;;;; Please see LICENSE.txt in the same directory as this file.
 ;;;; ================================================================
 
+;;================================================================
+;; To do:
+;; * docstrings & in-line examples.
+;; * wiki ...
+;; * notes for Clojure-from-Lisp follow.
+;;----------------------------------------------------------------
+;; * eval order ... different from CL.
+;;----------------------------------------------------------------
+;; * this is very different from CL:
+;;   (class '(2 3 4))
+;;   (class (cons 1 '(2 3 4)))
+;;
+;;----------------------------------------------------------------
+;; OK in CL:
+;;(defun foo (x)
+;;(+ 1 (bar x)))
+;;
+;;(defun bar (x) (* 2 x))
+;;(print (foo 10))
+;;----------------------------------------------------------------
+;; Not OK in Clojure:
+;;
+;;(defn foo [x]
+;; (+ 1 (bar x)))
+;;(defn bar [x] (* 2 x))
+;;
+;;(print (foo 10))
+;;
+;; but works on w/ bar defined before foo
+;;----------------------------------------------------------------
+;; very important re the consing et al.:  http://clojure.org/sequences
+
 ;;; =============================================================================
 ;;; RUBE DATA SECTION -- lookup tables.
 
@@ -67,27 +68,30 @@
 ;; in a clockwise direction.  This could be calculated at run-time,
 ;; but it seems simpler to do a table lookup.
 (def table-clockwise-orient-set
+  ;; Corner-piece representations which have a clockwise orientation.  Used for
+  ;; determining signs of moves.
   #{'URF 'UFL 'ULB 'UBR 'DFR 'DRB 'DBL 'DLF
     'RFU 'FLU 'LBU 'BRU 'FRD 'RBD 'BLD 'LFD
     'FUR 'LUF 'BUL 'RUB 'RDF 'BDR 'LDB 'FDL})
 
-;; Data for the image of a face under a move.  Faces are down the table; moves are across.
-;; Faces are represented as characters; moves are represented by symbols.
-;; Key into this table by face to get an array of images of that face.
-;; Index into the resulting array, using the table-move-index-lookup-alist, to get
-;; the image of the specified face under the specified move.
+;; Data for the image of a face under a move.  Faces are down the table; moves
+;; are across.  Faces are represented as characters; moves are represented by
+;; symbols.  Key into this table by face to get an array of images of that
+;; face.  Index into the resulting array, using the
+;; table-move-index-lookup-alist, to get the image of the specified face under
+;; the specified move.
 (def table-move-on-face-table
-	  ;;     F+ R+ B+ L+ U+ D+ F- R- B- L- U- D- F2 R2 B2 L2 U2 D2
-	  ;; FRBLUD going down
-	  {\F [ \F \U \F \D \L \R \F \D \F \U \R \L \F \B \F \B \B \B ],
-	   \R [ \D \R \U \R \F \B \U \R \D \R \B \F \L \R \L \R \L \L ],
-	   \B [ \B \D \B \U \R \L \B \U \B \D \L \R \B \F \B \F \F \F ],
-	   \L [ \U \L \D \L \B \F \D \L \U \L \F \B \R \L \R \L \R \R ],
-	   \U [ \R \B \L \F \U \U \L \F \R \B \U \U \D \D \D \D \U \R ],
-	   \D [ \L \F \R \B \D \D \R \B \L \F \D \D \U \U \U \U \D \D ]})
+  ;;     F+ R+ B+ L+ U+ D+ F- R- B- L- U- D- F2 R2 B2 L2 U2 D2
+  ;; FRBLUD going down
+  {\F [ \F \U \F \D \L \R \F \D \F \U \R \L \F \B \F \B \B \B ],
+   \R [ \D \R \U \R \F \B \U \R \D \R \B \F \L \R \L \R \L \L ],
+   \B [ \B \D \B \U \R \L \B \U \B \D \L \R \B \F \B \F \F \F ],
+   \L [ \U \L \D \L \B \F \D \L \U \L \F \B \R \L \R \L \R \R ],
+   \U [ \R \B \L \F \U \U \L \F \R \B \U \U \D \D \D \D \U \R ],
+   \D [ \L \F \R \B \D \D \R \B \L \F \D \D \U \U \U \U \D \D ]})
 
 ;; See above comment.
-;; xxx maybe reduce table count by one, using a hash map.
+;; To do: maybe reduce table count by one, using a hash map.
 (def table-move-index-lookup-alist
    {'F+    0, 'R+    1, 'B+     2, 'L+    3, 'U+    4, 'D+    5,
     'F-    6, 'R-    7, 'B-     8, 'L-    9, 'U-   10, 'D-   11,
@@ -99,6 +103,9 @@
     'f2   12, 'r2   13, 'b2    14, 'l2   15, 'u2   16, 'd2   17,
     'f     0, 'r     1, 'b      2, 'l     3, 'u     4, 'd     5,
     'f-1   6, 'r-1   7, 'b-1    8, 'l-1   9, 'u-1  10, 'd-1  11})
+
+;;(def table-move-on-face-map
+;;  {'F+})
 
 (def table-set-of-valid-moves
   #{'F   'R   'B   'L   'U   'D
@@ -114,37 +121,38 @@
 
 ;; A table (represented as a hash map) to show the inverse of any move.
 (def table-invert-move-alist
-	  {'F+  'F-, 'R+  'R-, 'B+  'B-, 'L+  'L-, 'U+  'U-, 'D+  'D-,
-       'F-  'F+, 'R-  'R+, 'B-  'B+, 'L-  'L+, 'U-  'U+, 'D-  'D+,
-       'F2  'F2, 'R2  'R2, 'B2  'B2, 'L2  'L2, 'U2  'U2, 'D2  'D2,
-       'F   'F-, 'R   'R-, 'B   'B-, 'L   'L-, 'U   'U-, 'D   'D-,
-       'f+  'f-, 'r+  'r-, 'b+  'b-, 'l+  'l-, 'u+  'u-, 'd+  'd-,
-       'f-  'f+, 'r-  'r+, 'b-  'b+, 'l-  'l+, 'u-  'u+, 'd-  'd+,
-       'f2  'f2, 'r2  'r2, 'b2  'b2, 'l2  'l2, 'u2  'u2, 'd2  'd2,
-       'f   'f-, 'r   'r-, 'b   'b-, 'l   'l-, 'u   'u-, 'd   'd-})
+  {'F+  'F-, 'R+  'R-, 'B+  'B-, 'L+  'L-, 'U+  'U-, 'D+  'D-,
+   'F-  'F+, 'R-  'R+, 'B-  'B+, 'L-  'L+, 'U-  'U+, 'D-  'D+,
+   'F2  'F2, 'R2  'R2, 'B2  'B2, 'L2  'L2, 'U2  'U2, 'D2  'D2,
+   'F   'F-, 'R   'R-, 'B   'B-, 'L   'L-, 'U   'U-, 'D   'D-,
+   'f+  'f-, 'r+  'r-, 'b+  'b-, 'l+  'l-, 'u+  'u-, 'd+  'd-,
+   'f-  'f+, 'r-  'r+, 'b-  'b+, 'l-  'l+, 'u-  'u+, 'd-  'd+,
+   'f2  'f2, 'r2  'r2, 'b2  'b2, 'l2  'l2, 'u2  'u2, 'd2  'd2,
+   'f   'f-, 'r   'r-, 'b   'b-, 'l   'l-, 'u   'u-, 'd   'd-})
 
 ;; A table of all the movable pieces (i.e., not including centers)
 ;; on the cube.
-(def table-set-of-all-pieces
-  #{'UFR 'UFL 'UBL 'UBR 'DFR 'DFL 'DBL 'DBR
-    'UF 'UL 'UB 'UR 'FR 'FL 'BL 'BR 'DF 'DL 'DB 'DR})
-; xxx not seq of the set.  keep the order nice.
 (def table-list-of-all-pieces
   (list 'UFR 'UFL 'UBL 'UBR 'DFR 'DFL 'DBL 'DBR
     'UF 'UL 'UB 'UR 'FR 'FL 'BL 'BR 'DF 'DL 'DB 'DR))
+;; Do set of the seq, not seq of the set, to keep the order nice.
+(def table-set-of-all-pieces
+  (set table-list-of-all-pieces))
 
 ;;; =============================================================================
 ;; RUBE PORTABILITY SECTION
-;; Implementation of these functions depends on the platform:
-;; xxx for clj, much more than this ... probably strip these out.
+;; Implementation of these functions depends on the platform.  When I originally
+;; wrote a Common Lisp version, then ported it to Emacs Lisp, these functions
+;; were all that needed changing.  For Clojure, of course, the differences are
+;; far more pervasive.
 ;;
 ;; For Common Lisp, use "string".
-;; For Emacs List, use "prin1-to-string".
+;; For Emacs Lisp, use "prin1-to-string".
 (defn symbol-to-string [sym]
   (.toString sym))
 
 ;; For Common Lisp, use "char".
-;; For Emacs List, use "aref".
+;; For Emacs Lisp, use "aref".
 (defn select-char-in-string [string elt]
   (.charAt string elt))
 
@@ -154,7 +162,7 @@
   (= (.getName (class p)) "java.lang.Character"))
 
 ;;; =============================================================================
-;;; xxx note important for UT
+;;; This function is particularly important for unit test.
 
 ;; The names of three adjacent faces provide the name of a corner piece;
 ;; the names of two adjacent faces provide the name of an edge piece.
@@ -167,6 +175,7 @@
 ;; same as UF.
 
 (defn piece-equal? [piece-1 piece-2]
+  "Determines whether two pieces are equal: e.g. UFR and FRU are the same piece."
   (let [length-1 (.length (symbol-to-string piece-1))
         length-2 (.length (symbol-to-string piece-2))]
     (cond (not (= length-1 length-2)) false ;; edges and corners can't possibly be the same
@@ -217,45 +226,49 @@
         (recur (rest list-1) (rest list-2))))
 
 ;;; -----------------------------------------------------------------------------
-;; xxx cmt about return types
+;; To do: cmt about return types
 (defn validate-moves-aux [moves]
   (cond (empty? moves) true
         :else
         (let [move (first moves)]
           (if (not (contains?  table-set-of-valid-moves move))
-            (throw (Exception. (format "Malformed move \"%s\" in sequence \"%s\"." (.toString move) (.toString moves))))
+            (throw
+              (Exception.
+                (format "Malformed move \"%s\" in sequence \"%s\"."
+                        (.toString move) (.toString moves))))
             (recur (rest moves))))))
 
 (defn validate-moves [moves]
   (if (validate-moves-aux moves)
     moves
-    ;; xxx find a more elegant way to do this ... maybe use an each filter for the aux w/ boolean rv,
-    ;; & do the throw from here ... ?
+    ;; To do: find a more elegant way to do this ... maybe use an each filter for
+    ;; the aux w/ boolean rv, & do the throw from here ... ?
     "An exception should have been thrown and you should not see this."))
 
 ;;; =============================================================================
 ;;; RUBE LOWEST-LEVEL-MOVES SECTION
 ;;; Image of a single face under a move.
 
-(defn is-corner-piece [piece]
+(defn is-corner-piece? [piece]
   (= 3 (.length (symbol-to-string piece))))
-(defn is-edge-piece [piece]
+(defn is-edge-piece? [piece]
   (= 2 (.length (symbol-to-string piece))))
 
 ;; ----------------------------------------------------------------
 ;; Returns the image of a face under a move.
 ;; Faces are represented by characters; moves are represented by symbols.
 ;; Does a simple table lookup.
-(defn move-on-face [move face]
+(defn find-image-of-move-on-face [move face]
+  "Returns the image of a face under a move."
   (let [row-vector (table-move-on-face-table face),
         vector-index (table-move-index-lookup-alist move)]
     (cond (= nil row-vector)
-          (throw (format "move-on-face:  Rule lookup failed for face %s."
+          (throw (format "find-image-of-move-on-face:  Rule lookup failed for face %s."
                          (cond (symbol? face) (symbol-to-string face)
                                (string? face) face
                                (character? face) (symbol-to-string face))))
           (= nil vector-index)
-          (throw (format "move-on-face:  Rule lookup failed for move %s."
+          (throw (format "find-image-of-move-on-face:  Rule lookup failed for move %s."
                          (cond (symbol? move) (.toString move)
                                (string? move) move
                                (character? move) (symbol-to-string move))))
@@ -279,7 +292,8 @@
 ;;
 ;; Both arguments are represented by symbols.
 
-(defn move-on-corner-piece [move corner]
+(defn find-image-of-move-on-corner-piece [move corner]
+  "Returns the image of a corner piece under a move."
   (let [ps   (symbol-to-string corner),
         ps0  (select-char-in-string ps 0),
         ps1  (select-char-in-string ps 1),
@@ -287,9 +301,9 @@
         face (select-char-in-string (symbol-to-string move) 0)]
     (if (or (= face ps0) (= face ps1) (= face ps2))
       (symbol
-        (str (symbol-to-string (move-on-face move ps0))
-             (symbol-to-string (move-on-face move ps1))
-             (symbol-to-string (move-on-face move ps2))))
+        (str (symbol-to-string (find-image-of-move-on-face move ps0))
+             (symbol-to-string (find-image-of-move-on-face move ps1))
+             (symbol-to-string (find-image-of-move-on-face move ps2))))
       ;; else
       corner)))
 
@@ -310,7 +324,8 @@
 ;;
 ;; Both arguments are represented by symbols.
 
-(defn move-on-edge-piece [move edge]
+(defn find-image-of-move-on-edge-piece [move edge]
+  "Returns the image of an edge piece under a move."
   (let [ps   (symbol-to-string edge)
         ps0  (select-char-in-string ps 0)
         ps1  (select-char-in-string ps 1)
@@ -318,8 +333,8 @@
     (if (or (= face ps0) (= face ps1))
       (symbol
         (str
-          (symbol-to-string (move-on-face move ps0))
-          (symbol-to-string (move-on-face move ps1))))
+          (symbol-to-string (find-image-of-move-on-face move ps0))
+          (symbol-to-string (find-image-of-move-on-face move ps1))))
       ;; else
       edge)))
 
@@ -328,34 +343,37 @@
 ;;; Image of a sequence of moves on a single (edge or corner) piece.
 
 ;; -----------------------------------------------------------------------------
-(defn moves-on-piece [moves piece]
+(defn find-image-of-moves-on-piece [moves piece]
+  "Returns the image of a list of moves on a piece."
   ;; Need to tune this (use an auxiliary function? moves-on-corner-piece and
   ;; moves-on-edge-piece?) so that it doesn't check the same piece over and
   ;; over for corner/edge.  Once passed in, it won't change!
-  (if (is-corner-piece piece)
+  (if (is-corner-piece? piece)
     (if (empty? moves)
       piece
       (recur
         (rest moves)
-        (move-on-corner-piece (first moves) piece)))
+        (find-image-of-move-on-corner-piece (first moves) piece)))
     (if (empty? moves)
       piece
       (recur
         (rest moves)
-        (move-on-edge-piece (first moves) piece)))))
+        (find-image-of-move-on-edge-piece (first moves) piece)))))
 
 ;;; =============================================================================
 ;;; RUBE FOURTH-LOWEST-LEVEL-MOVES SECTION
 ;;; Image of a sequence of moves on a list of pieces.
 
 ;;----------------------------------------------------------------
-(defn moves-on-pieces [moves pieces]
-  (map (fn [piece] (moves-on-piece moves piece)) pieces))
+(defn find-image-of-find-image-of-moves-on-pieces [moves pieces]
+  "Returns the image of a list of moves on a list of pieces."
+  (map (fn [piece] (find-image-of-moves-on-piece moves piece)) pieces))
 
 ;;; =============================================================================
 ;;; RUBE EXPONENT SECTION
 
 (defn invert-move [move]
+  "Returns the inverse of a single move."
   (let [inv (table-invert-move-alist move)]
     (cond (nil? inv)
           (throw
@@ -365,6 +383,7 @@
           inv)))
 
 (defn invert-moves [moves]
+  "Returns the inverse of a sequence of moves."
   ;; Inverting a list of moves means reversing it and replacing each
   ;; individual move with its inverse: (A * B)^-1 = B^-1 * A^-1.
   (cond (empty? moves) '()
@@ -374,21 +393,22 @@
           (invert-moves (rest moves))
           (list (invert-move (first moves))))))
 
-(defn power-of-sequence [moves power]
-  ;; Negative exponents indicate inversion.
+(defn find-power-of-sequence [moves power]
+  "Returns a multiple concatenation of a sequence of moves.  Negative exponents indicate inversion."
   (cond (= power  0) '()
-		(= power  1) moves
-		(> power  1) (concat moves (power-of-sequence moves (- power 1)))
-		(= power -1) (invert-moves moves)
-		(< power -1) (power-of-sequence (invert-moves moves) (- power))))
+        (= power  1) moves
+        (> power  1) (concat moves (find-power-of-sequence moves (- power 1)))
+        (= power -1) (invert-moves moves)
+        (< power -1) (find-power-of-sequence (invert-moves moves) (- power))))
 
-(defn conjugate [moves1 moves2]
-  ;; The conjugate of A by B: denoted A * B * A^-1.
+(defn find-conjugate [moves1 moves2]
+  "Returns the find-conjugate of A by B: A * B * A^-1."
   (let [lmoves1 (if (symbol? moves1) (list moves1) moves1)
         lmoves2 (if (symbol? moves2) (list moves2) moves2)]
     (concat lmoves1 lmoves2 (invert-moves lmoves1))))
 
-(defn commutator [moves1 moves2]
+(defn find-commutator [moves1 moves2]
+  "Returns the commutator of A and B: A * B * A^-1 * B^-1."
   ;; The commutator of two moves or list of moves on the Rubik's Cube.  In
   ;; group theory, the commutator of A and B, written [A B], is defined to be A
   ;; * B * A^-1 * B^-1.  Then [A B] == the identity sequence precisely when A
@@ -398,15 +418,15 @@
   ;; identity on the cube but which is not pared down to such symbolically.
   ;; This fact will be discovered by cycle decomposition.
   (let [lmoves1 (if (symbol? moves1) (list moves1) moves1)
-		lmoves2 (if (symbol? moves2) (list moves2) moves2)]
+        lmoves2 (if (symbol? moves2) (list moves2) moves2)]
     (concat lmoves1 lmoves2
             (invert-moves lmoves1) (invert-moves lmoves2))))
 
 ;;; =============================================================================
 ;;; RUBE CYCLE SECTION
 
-(defn cycle-length [cycle]
-  ;; Supports the signed-cycle notation used by the cycle-decomposition logic.
+(defn find-cycle-length [cycle]
+  ;; Supports the signed-cycle notation used by the find-cycle-decomposition logic.
   ;; E.g. the cycle '(UFR DFL) has length 2.  But '(UFR +) has length, not 1,
   ;; but 3.  Likewise '(UF UB +) has length 4.
   (if (or (= (last cycle) '+) (= (last cycle) '-))
@@ -425,14 +445,14 @@
   ;; as one in the tree, not considering spin).
   (cond (and (seq? tree) (empty? tree)) false
         (not (seq? tree)) (piece-equal? atm tree)
-		;; ((equal atm tree) t) ;; I would use equal outside of Rube code.
+        ;; ((equal atm tree) t) ;; I would use equal outside of Rube code.
         ;; I want to see if a piece has already been decomposed, regardless of
         ;; orientation; hence the need for piece-equal?.
-		:else (or (memtree? atm (first tree)) (memtree? atm (rest tree)))))
+        :else (or (memtree? atm (first tree)) (memtree? atm (rest tree)))))
 
 ;; -----------------------------------------------------------------------------
-(defn get-sign-of-rotation [orient-1 orient-2]
-  ;; xxx comment re context
+(defn find-sign-of-rotation [orient-1 orient-2]
+  ;; To do: comment re context
   (cond
     ; Same representation of same piece -- no spin.
     (= orient-1 orient-2) '()
@@ -441,8 +461,8 @@
     (not (piece-equal? orient-1 orient-2)) '()
 
     ; Arbitrarily, say + for any differently represented edges
-	; (the rotation group only has order 2).
-    (is-edge-piece orient-1) '(+)
+    ; (the rotation group only has order 2).
+    (is-edge-piece? orient-1) '(+)
 
     ; Now they must be corner pieces.  Do a table lookup.
     (contains? table-clockwise-orient-set orient-1)
@@ -458,17 +478,17 @@
 (defn find-cycle-aux [piece-list start-piece moves]
   ;; Returns the unsigned cycle of piece under moves, reversed.
   ;; This is an implementation detail of the cycle-finder.
-  ;; xxx elaborate on that.
+  ;; To do: elaborate on that.
   (let [curr-piece (first piece-list)
-        next-piece (moves-on-piece moves curr-piece)]
+        next-piece (find-image-of-moves-on-piece moves curr-piece)]
     (if (piece-equal? next-piece start-piece)
       piece-list
       (recur (cons next-piece piece-list) start-piece moves))))
 
 (defn find-cycle [piece moves]
   (let [unsigned-reversed-cycle (find-cycle-aux (list piece) piece moves)
-        next-piece (moves-on-piece moves (first unsigned-reversed-cycle))]
-    (reverse (concat (get-sign-of-rotation next-piece piece) unsigned-reversed-cycle))))
+        next-piece (find-image-of-moves-on-piece moves (first unsigned-reversed-cycle))]
+    (reverse (concat (find-sign-of-rotation piece next-piece) unsigned-reversed-cycle))))
 
 ;;;----------------------------------------------------------------
 (defn find-cycles-aux [pieces moves current-cycles]
@@ -493,8 +513,8 @@
     cycles))
 
 ;; -----------------------------------------------------------------------------
-; xxx make this name a verb
-(defn cycle-decomposition [moves]
+; To do: make this name a verb
+(defn find-cycle-decomposition [moves]
   ;; Given a list of Rubik's Cube pieces and a list of moves, return the cycle
   ;; decomposition of the moves, omitting trivial cycles.
   (delete-one-cycles (find-cycles table-list-of-all-pieces moves)))
@@ -502,15 +522,15 @@
 ;;; =============================================================================
 ;;; RUBE ORDER SECTION
 
-(defn multi-lcm [args]
+(defn find-multi-lcm [args]
   (cond (empty? args) 1
         :else (let [f (first args) r (rest args)]
-                (clojure.contrib.math/lcm f (multi-lcm r)))))
+                (clojure.contrib.math/lcm f (find-multi-lcm r)))))
 
-(defn order [moves]
-  (multi-lcm
-         (map #(cycle-length %)
-              (cycle-decomposition moves))))
+(defn find-order [moves]
+  (find-multi-lcm
+         (map #(find-cycle-length %)
+              (find-cycle-decomposition moves))))
 
 ;;; =============================================================================
 ;;; RUBE IMAGES SECTION
@@ -521,19 +541,19 @@
 ;; * filter out non-trivial pairs: !pc=, or pc= but s-o-r != '()
 ;; * print that
 
-;; xxx could be a letrec.
-;; xxx standalone for UT ... ?
+;; To do: could be a letrec.
+;; To do: standalone for UT ... ?
 (defn pair-pieces-and-images [pieces images]
   (if (empty? pieces)
     '()
     (let [first-piece (first pieces)
           first-image (first images)
-          sign (get-sign-of-rotation first-piece first-image)]
+          sign (find-sign-of-rotation first-piece first-image)]
       ; same piece, no sign.
       ; same piece, with sign
       ; different piece
       (if (piece-equal? first-piece first-image)
-        (if (empty? sign) ; xxx maybe use null?
+        (if (empty? sign) ; To do: maybe use null?
           (pair-pieces-and-images (rest pieces) (rest images))
           (cons
             (list first-piece (first sign))
@@ -542,22 +562,23 @@
           (list first-piece '-> first-image)
           (pair-pieces-and-images (rest pieces) (rest images)))))))
 
-(defn images-of-pieces [moves, pieces]
-  (pair-pieces-and-images pieces (moves-on-pieces moves pieces)))
+(defn find-images-of-pieces [moves, pieces]
+  (pair-pieces-and-images pieces (find-image-of-find-image-of-moves-on-pieces moves pieces)))
 
-(defn images-of-all-pieces [moves]
-  (images-of-pieces moves table-list-of-all-pieces))
+(defn find-images-of-all-pieces [moves]
+  (find-images-of-pieces moves table-list-of-all-pieces))
 
 ;;; =============================================================================
 ;;; RUBE PPRINT SECTION
 
 ;; Example output:
+;; (tell-about '(B- U2 B2 U B- U- B- U2 F R B R- F-))
 ;;
 ;; -- Sequence is:
 ;; B- U2 B2 U B- U- B- U2 F R B R- F-
 ;; -- Image is:
-;; UB BU
-;; UR RU
+;; UB +
+;; UR +
 ;; -- Cycle decomposition is:
 ;; UB +
 ;; UR +
@@ -572,11 +593,9 @@
 (defn print-moves [moves]
   (print-delimited moves " "))
 (defn print-images [moves]
-  (print-delimited (images-of-all-pieces moves) "\n"))
+  (print-delimited (find-images-of-all-pieces moves) "\n"))
 (defn print-cycle-decomposition [moves]
-  (print-delimited (cycle-decomposition moves) "\n"))
-;;(print-images '(F R B L))
-;;(images-of-all-pieces '(F R B L))
+  (print-delimited (find-cycle-decomposition moves) "\n"))
 
 (defn tell-about [moves]
   (validate-moves moves)
@@ -590,5 +609,5 @@
   (print-cycle-decomposition moves)
   (println)
   (print "-- Order is: ")
-  (println (order moves))
-  nil) ; xxx how to do (values)?
+  (println (find-order moves))
+  nil) ; To do: how to do (values)?
