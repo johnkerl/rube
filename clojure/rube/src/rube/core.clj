@@ -1,7 +1,6 @@
 (ns rube.core
   (:require clojure.contrib.math))
 
-
 ;;;; ================================================================
 ;;;; RUBE.CLJ
 ;;;;
@@ -27,7 +26,7 @@
 ;;;; ================================================================
 
 ;;================================================================
-;; To do:
+;; To do (porting experiment underway):
 ;; * docstrings & in-line examples.
 ;; * wiki ...
 ;; * notes for Clojure-from-Lisp follow.
@@ -104,9 +103,6 @@
     'f     0, 'r     1, 'b      2, 'l     3, 'u     4, 'd     5,
     'f-1   6, 'r-1   7, 'b-1    8, 'l-1   9, 'u-1  10, 'd-1  11})
 
-;;(def table-move-on-face-map
-;;  {'F+})
-
 (def table-set-of-valid-moves
   #{'F   'R   'B   'L   'U   'D
     'F+  'R+  'B+  'L+  'U+  'D+
@@ -139,6 +135,55 @@
 (def table-set-of-all-pieces
   (set table-list-of-all-pieces))
 
+;; These equivalence classes are for piece-equal?
+(def UFL_equivs #{'UFL 'ULF 'FUL 'FLU 'LUF 'LFU})
+(def UFR_equivs #{'UFR 'URF 'FUR 'FRU 'RUF 'RFU})
+(def UBL_equivs #{'UBL 'ULB 'BUL 'BLU 'LUB 'LBU})
+(def UBR_equivs #{'UBR 'URB 'BUR 'BRU 'RUB 'RBU})
+(def DFL_equivs #{'DFL 'DLF 'FDL 'FLD 'LDF 'LFD})
+(def DFR_equivs #{'DFR 'DRF 'FDR 'FRD 'RDF 'RFD})
+(def DBL_equivs #{'DBL 'DLB 'BDL 'BLD 'LDB 'LBD})
+(def DBR_equivs #{'DBR 'DRB 'BDR 'BRD 'RDB 'RBD})
+
+(def UF_equivs #{'UF 'FU})
+(def UL_equivs #{'UL 'LU})
+(def UB_equivs #{'UB 'BU})
+(def UR_equivs #{'UR 'RU})
+(def FR_equivs #{'FR 'RF})
+(def FL_equivs #{'FL 'LF})
+(def BL_equivs #{'BL 'LB})
+(def BR_equivs #{'BR 'RB})
+(def DF_equivs #{'DF 'FD})
+(def DL_equivs #{'DL 'LD})
+(def DB_equivs #{'DB 'BD})
+(def DR_equivs #{'DR 'RD})
+
+;; For each possible representation of each piece, a map from that
+;; representation to the set of representations equivalent to it.
+(def corner-piece-equivs
+  { 'UFL  UFL_equivs, 'ULF  UFL_equivs, 'FUL  UFL_equivs, 'FLU  UFL_equivs, 'LUF  UFL_equivs, 'LFU  UFL_equivs,
+    'UFR  UFR_equivs, 'URF  UFR_equivs, 'FUR  UFR_equivs, 'FRU  UFR_equivs, 'RUF  UFR_equivs, 'RFU  UFR_equivs,
+    'UBL  UBL_equivs, 'ULB  UBL_equivs, 'BUL  UBL_equivs, 'BLU  UBL_equivs, 'LUB  UBL_equivs, 'LBU  UBL_equivs,
+    'UBR  UBR_equivs, 'URB  UBR_equivs, 'BUR  UBR_equivs, 'BRU  UBR_equivs, 'RUB  UBR_equivs, 'RBU  UBR_equivs,
+    'DFL  DFL_equivs, 'DLF  DFL_equivs, 'FDL  DFL_equivs, 'FLD  DFL_equivs, 'LDF  DFL_equivs, 'LFD  DFL_equivs,
+    'DFR  DFR_equivs, 'DRF  DFR_equivs, 'FDR  DFR_equivs, 'FRD  DFR_equivs, 'RDF  DFR_equivs, 'RFD  DFR_equivs,
+    'DBL  DBL_equivs, 'DLB  DBL_equivs, 'BDL  DBL_equivs, 'BLD  DBL_equivs, 'LDB  DBL_equivs, 'LBD  DBL_equivs,
+    'DBR  DBR_equivs, 'DRB  DBR_equivs, 'BDR  DBR_equivs, 'BRD  DBR_equivs, 'RDB  DBR_equivs, 'RBD  DBR_equivs } )
+
+(def edge-piece-equivs
+  { 'UF  UF_equivs, 'FU  UF_equivs,
+    'UL  UL_equivs, 'LU  UL_equivs,
+    'UB  UB_equivs, 'BU  UB_equivs,
+    'UR  UR_equivs, 'RU  UR_equivs,
+    'FR  FR_equivs, 'RF  FR_equivs,
+    'FL  FL_equivs, 'LF  FL_equivs,
+    'BL  BL_equivs, 'LB  BL_equivs,
+    'BR  BR_equivs, 'RB  BR_equivs,
+    'DF  DF_equivs, 'FD  DF_equivs,
+    'DL  DL_equivs, 'LD  DL_equivs,
+    'DB  DB_equivs, 'BD  DB_equivs,
+    'DR  DR_equivs, 'RD  DR_equivs })
+
 ;;; =============================================================================
 ;; RUBE PORTABILITY SECTION
 ;; Implementation of these functions depends on the platform.  When I originally
@@ -162,6 +207,12 @@
   (= (.getName (class p)) "java.lang.Character"))
 
 ;;; =============================================================================
+(defn is-corner-piece? [piece]
+  (= 3 (.length (symbol-to-string piece))))
+(defn is-edge-piece? [piece]
+  (= 2 (.length (symbol-to-string piece))))
+
+;;; =============================================================================
 ;;; This function is particularly important for unit test.
 
 ;; The names of three adjacent faces provide the name of a corner piece;
@@ -174,43 +225,19 @@
 ;; E.g. UFR is the same as FRU; UFR is not the same as UFL; UFR is not the
 ;; same as UF.
 
-(defn piece-equal? [piece-1 piece-2]
+(defn corner-piece-equal? [p1 p2]
+  (contains? (p1 corner-piece-equivs) p2))
+(defn edge-piece-equal? [p1 p2]
+  (contains? (p1 edge-piece-equivs) p2))
+;; To do: piece-lists-equal? can give us e.g. '(UF +).  So input (namely, the
+;; '+) may not be a valid piece. Comment this well, or rework the caller.
+(defn piece-equal? [p1 p2]
   "Determines whether two pieces are equal: e.g. UFR and FRU are the same piece."
-  (let [length-1 (.length (symbol-to-string piece-1))
-        length-2 (.length (symbol-to-string piece-2))]
-    (cond (not (= length-1 length-2)) false ;; edges and corners can't possibly be the same
-
-          (= length-1 3) ; Corner pieces; there are 6 face permutations to consider.
-          (let [p1  (symbol-to-string piece-1)
-                p2  (symbol-to-string piece-2)
-                p11 (select-char-in-string p1 0)
-                p12 (select-char-in-string p1 1)
-                p13 (select-char-in-string p1 2)
-                p21 (select-char-in-string p2 0)
-                p22 (select-char-in-string p2 1)
-                p23 (select-char-in-string p2 2)]
-            (or
-              (and (= p11 p21) (= p12 p22) (= p13 p23))
-              (and (= p11 p21) (= p12 p23) (= p13 p22))
-              (and (= p11 p22) (= p12 p21) (= p13 p23))
-              (and (= p11 p22) (= p12 p23) (= p13 p21))
-              (and (= p11 p23) (= p12 p21) (= p13 p22))
-              (and (= p11 p23) (= p12 p22) (= p13 p21))))
-
-          (= length-1 2) ; Edge pieces; there are 2 face permutations to consider.
-          (let [p1  (symbol-to-string piece-1)
-                p2  (symbol-to-string piece-2)
-                p11 (select-char-in-string p1 0)
-                p12 (select-char-in-string p1 1)
-                p21 (select-char-in-string p2 0)
-                p22 (select-char-in-string p2 1)]
-            (or
-              (and (= p11 p21) (= p12 p22))
-              (and (= p12 p21) (= p11 p22))))
-
-          ;; The 't' statement (:else in Clojure) kept this predicate from
-          ;; returning #<unspecified> in Scheme.
-          :else (= piece-1 piece-2))))
+  (cond (and (is-corner-piece? p1) (is-corner-piece? p2))
+        (corner-piece-equal? p1 p2)
+        (and (is-edge-piece? p1) (is-edge-piece? p2))
+        (edge-piece-equal? p1 p2)
+        :else false))
 
 (defn piece-lists-equal? [list-1 list-2]
   ;; Principally for unit-test
@@ -248,11 +275,6 @@
 ;;; =============================================================================
 ;;; RUBE LOWEST-LEVEL-MOVES SECTION
 ;;; Image of a single face under a move.
-
-(defn is-corner-piece? [piece]
-  (= 3 (.length (symbol-to-string piece))))
-(defn is-edge-piece? [piece]
-  (= 2 (.length (symbol-to-string piece))))
 
 ;; ----------------------------------------------------------------
 ;; Returns the image of a face under a move.
