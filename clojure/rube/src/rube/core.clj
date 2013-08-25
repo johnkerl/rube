@@ -21,7 +21,6 @@
 ;;;; 12/93
 ;;;; Ported to Clojure Dec. 2012 ...
 ;;;; ================================================================
-;;;; This software is released under the terms of the GNU GPL.
 ;;;; Please see LICENSE.txt in the same directory as this file.
 ;;;; ================================================================
 
